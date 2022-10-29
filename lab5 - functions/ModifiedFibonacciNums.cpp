@@ -2,7 +2,7 @@
 
 using namespace std;
 
-long long int modifiedFibonacci(unsigned int n, unsigned int a, unsigned int b) {
+long long int modifiedFibonacci(unsigned int n, double a, double b) {
     long long modFib0 = 0;
     long long modFib1 = 0;
     long long modFib2 = 1;
@@ -31,7 +31,7 @@ long long int modifiedFibonacci(unsigned int n, unsigned int a, unsigned int b) 
 int main(int argc, char* argv[])
 {
     unsigned int fibonacciNumsQuantity;
-    unsigned int a, b;
+    double a, b;
     cin >> fibonacciNumsQuantity >> a >> b;
     
     for (int i = 0; i < fibonacciNumsQuantity; i++) {
