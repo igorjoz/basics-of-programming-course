@@ -1,0 +1,11 @@
+7
+19 84 22 5 4 101 8
+D 1 Gorge
+D 2 Julia
+D 6 Winston
+D 0 Obrien
+B 5 222
+B 6 222
+B 0 5
+D 2 Robert
+Q
