@@ -2,20 +2,166 @@
 
 using namespace std;
 
-struct Person {
-    char name[1000];
+int const MAX_LETTERS_IN_NAME = 1001;
+
+struct Person
+{
+public:
+    char name[MAX_LETTERS_IN_NAME];
     int keysQuantity = 0;
 
-    void print() {
-        cout << this->name << " " << this->keysQuantity << "\n";
+    void print()
+    {
+        cout << name << " " << keysQuantity << "\n";
+    }
+
+    Person()
+    {
+        name[0] = '\0';
+        keysQuantity = 0;
+    }
+
+    Person(char *name, int keysQuantity)
+    {
+        strcpy_s(this->name, name);
+        this->keysQuantity = keysQuantity;
     }
 };
 
-struct Room {
-    int index = 0;
-    Person* pointerToOwner = NULL;
+struct Room
+{
+public:
+    int number;
+    Person *owner;
+
+    Room()
+    {
+        number = -1;
+        owner = nullptr;
+    }
 };
 
+void readRoomsData(Room *rooms, int roomsQuantity)
+{
+    for (int i = 0; i < roomsQuantity; i++)
+    {
+        cin >> rooms[i].number;
+    }
+}
+
+int findRoomIndex(int roomNumber, Room *rooms, int roomsQuantity)
+{
+    for (int i = 0; i < roomsQuantity; i++)
+    {
+        if (rooms[i].number == roomNumber)
+        {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+void deleteIfHasNoKeys(Person *previousOwner)
+{
+    if (previousOwner->keysQuantity == 0)
+    {
+        delete previousOwner;
+    }
+}
+
+void handleAddingPerson(Room *rooms, int roomsQuantity)
+{
+    int roomIndex = -1;
+    Person *person = new Person();
+    Person *previousOwner = nullptr;
+    Room *room = nullptr;
+
+    cin >> roomIndex >> person->name;
+
+    room = &rooms[roomIndex];
+    previousOwner = room->owner;
+
+    if (previousOwner)
+    {
+        if (previousOwner == person)
+        {
+            return;
+        }
+
+        previousOwner->print();
+        previousOwner->keysQuantity--;
+
+        deleteIfHasNoKeys(previousOwner);
+    }
+    else
+    {
+        cout << "#\n";
+    }
+
+    room->owner = person;
+    person->keysQuantity++;
+}
+
+void handleKeyTransfer(Room *rooms, int roomsQuantity)
+{
+    int ownedRoomIndex = -1, newRoomNumber = -1;
+
+    cin >> ownedRoomIndex >> newRoomNumber;
+
+    Room *ownedRoom = &rooms[ownedRoomIndex];
+    Room *newRoom = nullptr;
+
+    int index = findRoomIndex(newRoomNumber, rooms, roomsQuantity);
+
+    if (index != -1)
+    {
+        newRoom = &rooms[index];
+    }
+
+    Person *owner = nullptr;
+    Person *previousOwner = nullptr;
+
+    if (ownedRoom)
+    {
+        owner = ownedRoom->owner;
+    }
+
+    if (!owner)
+    {
+        cout << "#\n";
+        return;
+    }
+
+    if (newRoom)
+    {
+        previousOwner = newRoom->owner;
+    }
+    else
+    {
+        cout << "!\n";
+        return;
+    }
+
+    if (previousOwner)
+    {
+        if (previousOwner != owner)
+        {
+            previousOwner->keysQuantity--;
+            deleteIfHasNoKeys(previousOwner);
+        }
+        else
+        {
+            owner->print();
+            return;
+        }
+    }
+
+    newRoom->owner = owner;
+    owner->keysQuantity++;
+
+    owner->print();
+}
 
 int main()
 {
@@ -24,71 +170,27 @@ int main()
 
     cin >> roomsQuantity;
 
-    Room* rooms = new Room[roomsQuantity];
+    Room *rooms = new Room[roomsQuantity];
 
-    for (int i = 0; i < roomsQuantity;  i++) {
-        cin >> rooms[i].index;
-    }
+    readRoomsData(rooms, roomsQuantity);
 
-    while (cin >> operationType) {
-        if (operationType == 'D') {
-            int roomIndex;
-            Person person;
-
-            cin >> roomIndex >> person.name;
-            person.keysQuantity++;
-
-            if (rooms[roomIndex].pointerToOwner != NULL) {
-                rooms[roomIndex].pointerToOwner->keysQuantity--;
-            }
-
-            rooms[roomIndex].pointerToOwner = &person;
-
-            if (person.keysQuantity == 1) {
-                cout << "#\n";
-            }
-            else {
-                person.print();
-            }
+    while (cin >> operationType)
+    {
+        if (operationType == 'D')
+        {
+            handleAddingPerson(rooms, roomsQuantity);
         }
-        else if (operationType == 'B') {
-            int ownedRoomIndex, newRoomIndex;
-            bool roomExists = false;
-
-            cin >> ownedRoomIndex >> newRoomIndex;
-
-            for (int i = 0; i < roomsQuantity; i++) {
-                if (rooms[i].index == newRoomIndex) {
-                    roomExists = true;
-                }
-            }
-
-            if (rooms[ownedRoomIndex].pointerToOwner == NULL) {
-                cout << "#\n";
-            }
-            else if (!roomExists) {
-                cout << "!\n";
-            }
-            else {
-                rooms[ownedRoomIndex].pointerToOwner->keysQuantity--;
-
-                if (rooms[ownedRoomIndex].pointerToOwner->keysQuantity == 0) {
-                    // handle deleting every single user
-                    //delete rooms[ownedRoomIndex].pointerToOwner;
-                }
-
-                rooms[newRoomIndex].pointerToOwner = rooms[ownedRoomIndex].pointerToOwner;
-                rooms[newRoomIndex].pointerToOwner->keysQuantity++;
-
-                rooms[newRoomIndex].pointerToOwner->print();
-            }
+        else if (operationType == 'B')
+        {
+            handleKeyTransfer(rooms, roomsQuantity);
         }
-        else {
-            delete[]rooms;
-
-            return 0;
+        else if (operationType == 'Q')
+        {
+            break;
         }
     }
+
+    delete[] rooms;
 
     return 0;
 }
